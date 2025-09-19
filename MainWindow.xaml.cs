@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -21,6 +22,7 @@ using PdfSharpCore.Fonts;
 using PureGIS_Geo_QC;
 using PureGIS_Geo_QC.Exports;
 using PureGIS_Geo_QC.Exports.Models;
+using PureGIS_Geo_QC.Licensing;
 using PureGIS_Geo_QC.Managers;
 using PureGIS_Geo_QC.Models;
 // 이름 충돌을 피하기 위한 using 별칭(alias) 사용
@@ -63,6 +65,79 @@ namespace PureGIS_Geo_QC.WPF
             if (this.IsTrialMode)
             {
                 this.Title += " (체험판)";
+            }
+        }
+        // MainWindow가 로드될 때 실행될 이벤트 핸들러를 추가합니다.
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            CheckLicense();
+            await CheckForUpdatesAsync(); // 업데이트 확인 함수 호출
+        }
+
+        /// <summary>
+        /// 프로그램 업데이트를 확인하고 사용자에게 알리는 비동기 메서드
+        /// </summary>
+        private async Task CheckForUpdatesAsync()
+        {
+            try
+            {
+                VersionInfo latestVersionInfo = await UpdateManager.CheckForUpdatesAsync();
+                if (latestVersionInfo == null) return; // 서버에서 정보를 못가져오면 조용히 종료
+
+                Version currentVersion = UpdateManager.GetCurrentVersion();
+                Version latestVersion = new Version(latestVersionInfo.LatestVersion);
+
+                // 현재 버전과 최신 버전을 비교합니다.
+                if (latestVersion > currentVersion)
+                {
+                    // 새 버전이 있으면 사용자에게 알림창을 띄웁니다.
+                    string message = $"새로운 버전({latestVersionInfo.LatestVersion})이 있습니다. 지금 업데이트하시겠습니까?\n\n";
+                    message += "릴리즈 노트:\n" + latestVersionInfo.ReleaseNotes;
+
+                    if (CustomMessageBox.Show(this, "업데이트 알림", message, true) == true)
+                    {
+                        // '확인'을 누르면 다운로드 URL을 기본 웹 브라우저로 엽니다.
+                        Process.Start(new ProcessStartInfo(latestVersionInfo.DownloadUrl) { UseShellExecute = true });
+
+                        // 프로그램을 종료하여 사용자가 설치를 진행하도록 유도
+                        this.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // 예외가 발생하더라도 프로그램 실행에 영향을 주지 않도록 처리
+                System.Diagnostics.Debug.WriteLine($"업데이트 프로세스 오류: {ex.Message}");
+            }
+        }
+        // 라이선스를 확인하고 로그인 창을 띄우는 메서드를 추가합니다.
+        private void CheckLicense()
+        {
+            // 향후 라이선스 정보를 로컬에 저장하고 유효성을 검사하는 로직을 추가할 수 있습니다.
+            // 지금은 매번 로그인 창을 띄웁니다.
+            var loginWindow = new LicenseLoginWindow
+            {
+                Owner = this // 로그인 창이 MainWindow 중앙에 오도록 설정
+            };
+
+            bool? isAuthenticated = loginWindow.ShowDialog();
+
+            if (isAuthenticated == true)
+            {
+                // 인증에 성공했거나 체험판을 선택한 경우
+                this.IsTrialMode = loginWindow.IsTrialMode;
+
+                // 체험판 모드일 경우 창 제목 변경
+                if (this.IsTrialMode)
+                {
+                    this.Title += " (체험판)";
+                }
+            }
+            else
+            {
+                // 사용자가 인증 없이 창을 닫은 경우
+                CustomMessageBox.Show(this, "알림", "라이선스 인증이 필요합니다. 프로그램을 종료합니다.");
+                this.Close(); // MainWindow를 닫습니다.
             }
         }
         // =======================================================
@@ -192,41 +267,49 @@ namespace PureGIS_Geo_QC.WPF
 
             InfrastructureCategory targetCategory = null;
 
-            // TreeView에서 선택된 항목을 기준으로 부모 카테고리를 찾습니다.
+            // TreeView에서 선택된 항목을 기준으로 부모 분류를 찾습니다.
             var selectedItem = ProjectTreeView.SelectedItem;
             if (selectedItem is InfrastructureCategory category)
             {
-                // 카테고리를 직접 선택한 경우
+                // 분류를 직접 선택한 경우
                 targetCategory = category;
             }
             else if (selectedItem is TableDefinition table)
             {
-                // 테이블을 선택한 경우, 해당 테이블이 속한 부모 카테고리를 찾습니다.
+                // 테이블을 선택한 경우, 해당 테이블이 속한 부모 분류를 찾습니다.
                 targetCategory = CurrentProject.Categories
                     .FirstOrDefault(c => c.Tables.Contains(table));
             }
 
+            // 아무것도 선택하지 않았다면 첫 번째 분류에 추가합니다.
             if (targetCategory == null)
             {
-                // 아무것도 선택하지 않았다면 첫 번째 카테고리에 추가 (기존 방식 유지)
                 targetCategory = CurrentProject.Categories.FirstOrDefault();
                 if (targetCategory == null)
                 {
-                    CustomMessageBox.Show(this, "오류", "테이블을 추가할 카테고리가 없습니다.");
+                    CustomMessageBox.Show(this, "오류", "테이블을 추가할 분류가 없습니다.");
                     return;
                 }
             }
 
-            var newTable = new TableDefinition
+            // InputDialog를 사용하여 사용자에게 테이블 이름을 입력받습니다.
+            var dialog = new InputDialog("새 테이블 이름을 입력하세요.", "새 테이블");
+            dialog.Owner = this;
+
+            if (dialog.ShowDialog() == true)
             {
-                TableId = "NEW_TABLE_" + DateTime.Now.ToString("HHmmss"),
-                TableName = "새 테이블"
-            };
+                var newTable = new TableDefinition
+                {
+                    // 고유 ID는 자동으로 생성하고, TableName은 입력받은 값으로 설정합니다.
+                    TableId = "TBL_" + DateTime.Now.ToString("HHmmss"),
+                    TableName = dialog.InputText
+                };
 
-            targetCategory.Tables.Add(newTable);
-            UpdateTableList(); // TreeView UI 새로고침
+                targetCategory.Tables.Add(newTable);
+                UpdateTreeView(); // TreeView UI 새로고침
 
-            CustomMessageBox.Show(this, "완료", $"'{targetCategory.CategoryName}' 카테고리에 새 테이블이 추가되었습니다.");
+                CustomMessageBox.Show(this, "완료", $"'{targetCategory.CategoryName}' 분류에 '{newTable.TableName}' 테이블이 추가되었습니다.");
+            }
         }
 
         /// <summary>
@@ -1258,8 +1341,22 @@ namespace PureGIS_Geo_QC.WPF
         {
             try
             {
-                var aboutWindow = new AboutWindow();
-                aboutWindow.Owner = this; // 부모 창 설정 (센터 정렬을 위해)
+                var aboutWindow = new AboutWindow
+                {
+                    Owner = this // 부모 창 설정
+                };
+
+                // LicenseManager 인스턴스에서 현재 라이선스 정보 가져오기
+                var licenseManager = LicenseManager.Instance;
+
+                // AboutWindow의 상태 업데이트 메서드 호출
+                aboutWindow.UpdateLicenseStatus(
+                    this.IsTrialMode,
+                    licenseManager.IsLicenseValid,
+                    licenseManager.CompanyName, // LicenseManager에 CompanyName, ExpiryDate 속성 추가 필요
+                    licenseManager.ExpiryDate
+                );
+
                 aboutWindow.ShowDialog(); // 모달 창으로 표시
             }
             catch (Exception ex)
@@ -1478,6 +1575,79 @@ namespace PureGIS_Geo_QC.WPF
                 {
                     SelectedFileHeader.Text = "결과 표시 중 오류가 발생했습니다";
                 }
+            }
+        }
+
+        /// <summary>
+        /// 새 카테고리 추가 버튼 클릭
+        /// </summary>
+        private void AddCategoryButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CurrentProject == null)
+            {
+                CustomMessageBox.Show(this, "오류", "프로젝트를 먼저 생성하거나 불러오세요.");
+                return;
+            }
+
+            var dialog = new InputDialog("새 분류 이름을 입력하세요.", "새 분류");
+            dialog.Owner = this;
+
+            if (dialog.ShowDialog() == true)
+            {
+                var newCategory = new InfrastructureCategory
+                {
+                    CategoryId = "CATE_" + DateTime.Now.ToString("HHmmss"),
+                    CategoryName = dialog.InputText
+                };
+                CurrentProject.Categories.Add(newCategory);
+                UpdateTreeView();
+            }
+        }
+
+        /// <summary>
+        /// 선택된 카테고리 이름 수정 버튼 클릭
+        /// </summary>
+        private void EditCategoryButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ProjectTreeView.SelectedItem is InfrastructureCategory selectedCategory)
+            {
+                var dialog = new InputDialog("분류 이름을 수정하세요.", selectedCategory.CategoryName);
+                dialog.Owner = this;
+
+                if (dialog.ShowDialog() == true)
+                {
+                    selectedCategory.CategoryName = dialog.InputText;
+                    UpdateTreeView(); // 이름 변경을 TreeView에 즉시 반영
+                }
+            }
+            else
+            {
+                CustomMessageBox.Show(this, "알림", "수정할 카테고리를 먼저 선택하세요.");
+            }
+        }
+
+        /// <summary>
+        /// 선택된 카테고리 삭제 버튼 클릭
+        /// </summary>
+        private void DeleteCategoryButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ProjectTreeView.SelectedItem is InfrastructureCategory selectedCategory)
+            {
+                string message = $"'{selectedCategory.CategoryName}' 분류를 삭제하시겠습니까?";
+                if (selectedCategory.Tables.Any())
+                {
+                    message += "\n\n⚠️ 경고: 이 분류에 포함된 모든 테이블도 함께 삭제됩니다!";
+                }
+
+                if (CustomMessageBox.Show(this, "분류 삭제", message, true) == true)
+                {
+                    CurrentProject.Categories.Remove(selectedCategory);
+                    UpdateTreeView();
+                }
+            }
+            else
+            {
+                CustomMessageBox.Show(this, "알림", "삭제할 분류를 먼저 선택하세요.");
             }
         }
 

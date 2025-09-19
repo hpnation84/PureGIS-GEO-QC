@@ -11,7 +11,8 @@
         Title="PureGIS Geo-QC" Height="600" Width="1000"
         Icon="img/Geo_QC.ico"
         WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip"
-        Background="#FF2D2D30">
+        Background="#FF2D2D30"
+        Loaded="MainWindow_Loaded">
     <Window.Resources>
         <local:BoolToCheckMarkConverter x:Key="BoolToCheckMarkConverter"/>
         <local:RemarksConverter x:Key="RemarksConverter"/>
@@ -339,12 +340,20 @@
                                 <TextBlock DockPanel.Dock="Top" Text="등록된 테이블" Foreground="White" FontSize="16" Margin="10" FontWeight="Bold"/>
 
                                 <StackPanel DockPanel.Dock="Top" Orientation="Vertical" Margin="10,0,10,10">
-                                    <Button Content="새 테이블 만들기" Name="NewTableButton" Click="NewTableButton_Click" Margin="0,0,0,5" 
-                                            Style="{StaticResource ModernButtonStyle}"/>
 
+                                    <TextBlock Text="분류 관리" Foreground="#FFAAAAAA" Margin="0,10,0,5"/>
+                                    <Button Content="새 분류 추가" Name="AddCategoryButton" Click="AddCategoryButton_Click" Style="{StaticResource ModernButtonStyle}" Margin="0,0,0,5"/>
+                                    <Button Content="선택 분류 수정" Name="EditCategoryButton" Click="EditCategoryButton_Click" Style="{StaticResource ModernButtonStyle}" Margin="0,0,0,5"/>
+                                    <Button Content="선택 분류 삭제" Name="DeleteCategoryButton" Click="DeleteCategoryButton_Click" Style="{StaticResource ModernButtonStyle}" Background="#b03a2e" Foreground="White"/>
+
+                                    <TextBlock Text="테이블 관리" Foreground="#FFAAAAAA" Margin="0,15,0,5"/>
+                                    <Button Content="새 테이블 만들기" Name="NewTableButton" Click="NewTableButton_Click" Margin="0,0,0,5" 
+            Style="{StaticResource ModernButtonStyle}"/>
                                     <Button Content="선택 테이블 삭제" Name="DeleteTableButton" Click="DeleteTableButton_Click" 
-                                            Style="{StaticResource ModernButtonStyle}" Background="#b03a2e" Foreground="White"/>
+            Style="{StaticResource ModernButtonStyle}" Background="#b03a2e" Foreground="White"/>
                                 </StackPanel>
+
+
 
                                 <!-- 기존 ListBox 대신 TreeView 사용 -->
                                 <TreeView Name="ProjectTreeView" Background="Transparent" Foreground="White" BorderThickness="0" 
@@ -355,10 +364,21 @@
                                         Drop="TreeView_Drop">
                                     <TreeView.ItemTemplate>
                                         <HierarchicalDataTemplate ItemsSource="{Binding Tables}">
-                                            <TextBlock Text="{Binding CategoryName}" FontWeight="Bold"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                                <TextBlock Text="📁" Margin="0,0,6,0" Foreground="#FF5DADE2" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding CategoryName}" 
+                                                            FontWeight="Bold" 
+                                                            Foreground="#FF5DADE2" 
+                                                            FontSize="14" 
+                                                            VerticalAlignment="Center"/>
+                                            </StackPanel>
+
                                             <HierarchicalDataTemplate.ItemTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding TableName}"/>
+                                                    <StackPanel Orientation="Horizontal" Margin="5,1">
+                                                        <TextBlock Text="📄" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding TableName}" Foreground="White" VerticalAlignment="Center"/>
+                                                    </StackPanel>
                                                 </DataTemplate>
                                             </HierarchicalDataTemplate.ItemTemplate>
                                         </HierarchicalDataTemplate>
