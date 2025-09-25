@@ -12,7 +12,8 @@
         Icon="img/Geo_QC.ico"
         WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip"
         Background="#FF2D2D30"
-        Loaded="MainWindow_Loaded">
+        Loaded="MainWindow_Loaded"
+        Closing="Window_Closing">
     <Window.Resources>
         <local:BoolToCheckMarkConverter x:Key="BoolToCheckMarkConverter"/>
         <local:RemarksConverter x:Key="RemarksConverter"/>
