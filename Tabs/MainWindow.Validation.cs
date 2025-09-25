@@ -306,8 +306,10 @@ namespace PureGIS_Geo_QC_Standalone
                         Std_ColumnName = stdCol.ColumnName,
                         Std_Type = stdCol.Type,
                         Std_Length = stdCol.Length,
+                        IsNotNullCorrect = true, // 기본값을 true로 설정
+                        IsCodeCorrect = true     // 기본값을 true로 설정
                     };
-
+                    // 1. 필드(컬럼) 존재 여부 및 구조 검사
                     if (!shapefile.DataTable.Columns.Contains(stdCol.ColumnId))
                     {
                         resultRow.Status = "오류";
@@ -318,15 +320,16 @@ namespace PureGIS_Geo_QC_Standalone
                         resultRow.IsTypeCorrect = false;
                         resultRow.IsLengthCorrect = false;
                         results.Add(resultRow);
-                        continue;
+                        continue; // 다음 기준 컬럼으로
                     }
-
+                    // 필드가 존재하면 구조 검사 계속 진행
                     var (curTypeName, curPrecision, curScale) = GetDbfFieldInfo(shapefile, stdCol.ColumnId);
                     resultRow.Found_FieldName = stdCol.ColumnId;
                     resultRow.IsFieldFound = true;
                     resultRow.Cur_Type = curTypeName;
                     resultRow.Cur_Length = curScale > 0 ? $"{curPrecision},{curScale}" : curPrecision.ToString();
 
+                    // 타입 검사
                     if (stdCol.Type.Equals("VARCHAR2", StringComparison.OrdinalIgnoreCase))
                     {
                         resultRow.IsTypeCorrect = curTypeName.Equals("Character", StringComparison.OrdinalIgnoreCase);
@@ -340,6 +343,7 @@ namespace PureGIS_Geo_QC_Standalone
                         resultRow.IsTypeCorrect = stdCol.Type.Equals(curTypeName, StringComparison.OrdinalIgnoreCase);
                     }
 
+                    // 길이 검사
                     if (resultRow.IsTypeCorrect)
                     {
                         var (stdPrecision, stdScale) = ParseStandardLength(stdCol.Length);
@@ -353,13 +357,50 @@ namespace PureGIS_Geo_QC_Standalone
                         }
                         else
                         {
-                            resultRow.IsLengthCorrect = true;
+                            resultRow.IsLengthCorrect = true; // 기타 타입은 길이 검사 생략
                         }
                     }
                     else
                     {
                         resultRow.IsLengthCorrect = false;
                     }
+                    // 2. 데이터 내용 검사 (NOT NULL, 코드값)
+                    CodeSet targetCodeSet = null;
+                    if (!string.IsNullOrEmpty(stdCol.CodeName))
+                    {
+                        targetCodeSet = CurrentProject.CodeSets.FirstOrDefault(cs => cs.CodeName.Equals(stdCol.CodeName, StringComparison.OrdinalIgnoreCase));
+                    }
+
+                    // DBF 파일의 모든 행(row)을 순회하며 내용 검사
+                    foreach (DataRow row in shapefile.DataTable.Rows)
+                    {
+                        object cellValue = row[stdCol.ColumnId];
+
+                        // NOT NULL 검사
+                        if (stdCol.IsNotNull)
+                        {
+                            if (cellValue == null || cellValue == DBNull.Value || string.IsNullOrWhiteSpace(cellValue.ToString()))
+                            {
+                                resultRow.NotNullErrorCount++;
+                                resultRow.IsNotNullCorrect = false;
+                            }
+                        }
+
+                        // 코드값 검사
+                        if (targetCodeSet != null && cellValue != null && cellValue != DBNull.Value)
+                        {
+                            string valueStr = cellValue.ToString().Trim();
+                            if (!string.IsNullOrEmpty(valueStr) && !targetCodeSet.Codes.Any(c => c.Code.Equals(valueStr, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                resultRow.CodeErrorCount++;
+                                resultRow.IsCodeCorrect = false;
+                            }
+                        }
+                    }
+
+                    // 3. 최종 상태 결정
+                    bool isContentValid = resultRow.IsNotNullCorrect && resultRow.IsCodeCorrect;
+                    bool isStructureValid = resultRow.IsFieldFound && resultRow.IsTypeCorrect && resultRow.IsLengthCorrect;
 
                     resultRow.Status = (resultRow.IsTypeCorrect && resultRow.IsLengthCorrect) ? "정상" : "오류";
                     results.Add(resultRow);

@@ -152,17 +152,23 @@ namespace PureGIS_Geo_QC_Standalone
             }
         }
         /// <summary>
-        /// Ctrl+V로 컬럼 데이터 붙여넣기
+        /// Ctrl+V로 데이터 붙여넣기
         /// </summary>
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.V && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
-                if (MainTabControl.SelectedIndex == 0) // 기준 정의 탭
+                // ===== 👇 [수정] 탭 인덱스에 따라 다른 메서드를 호출하도록 변경 =====
+                switch (MainTabControl.SelectedIndex)
                 {
-                    PasteColumnsToCurrentTable();
-                    e.Handled = true;
+                    case 0: // 기준 정의 탭
+                        PasteColumnsToCurrentTable();
+                        break;
+                    case 1: // 코드 관리 탭
+                        PasteCodesToCurrentCodeSet();
+                        break;
                 }
+                e.Handled = true;
             }
         }
         #endregion

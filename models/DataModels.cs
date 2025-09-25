@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ namespace PureGIS_Geo_QC.Models
     internal class DataModels
     {
     }
+    
     // 프로젝트 최상위 클래스
     public class ProjectDefinition
     {
@@ -18,6 +20,7 @@ namespace PureGIS_Geo_QC.Models
         public DateTime CreatedDate { get; set; }
         public DateTime LastModifiedDate { get; set; }
         public List<InfrastructureCategory> Categories { get; set; } = new List<InfrastructureCategory>();
+        public List<CodeSet> CodeSets { get; set; } = new List<CodeSet>(); // 코드셋 리스트 추가
     }
 
     // 8대 지하시설물 분류
@@ -53,7 +56,7 @@ namespace PureGIS_Geo_QC.Models
         public string Length { get; set; }
         public bool IsNotNull { get; set; }
         public string KeyType { get; set; } // PK/FK
-        public string CodeName { get; set; }
+        public string CodeName { get; set; } // 코드명 속성
         public string Remarks { get; set; }
     }
 
@@ -87,6 +90,11 @@ namespace PureGIS_Geo_QC.Models
         // 각 항목의 일치 여부
         public bool IsTypeCorrect { get; set; }
         public bool IsLengthCorrect { get; set; }
+        public bool IsNotNullCorrect { get; set; } // NOT NULL 검사 결과
+        public int NotNullErrorCount { get; set; } = 0; // NOT NULL 위반 개수
+
+        public bool IsCodeCorrect { get; set; } // 코드값 검사 결과
+        public int CodeErrorCount { get; set; } = 0; // 코드값 오류 개수
     }
 
     /// <summary>
@@ -128,5 +136,21 @@ namespace PureGIS_Geo_QC.Models
                 return ((double)TotalNormalColumns / TotalColumns * 100).ToString("F1") + "%";
             }
         }
+    }
+
+    // 코드와 코드명을 한 쌍으로 담는 클래스 (신규 추가)
+    public class CodeValue
+    {
+        public string Code { get; set; }        // 예: ADD001
+        public string Description { get; set; } // 예: 맨홀
+    }
+
+    // 코드 그룹과 코드 리스트를 담는 클래스
+    public class CodeSet
+    {
+        public string CodeName { get; set; } // 예: FTR_CDE
+
+        // ===== 👇 [수정] List를 BindingList로 변경합니다. =====
+        public BindingList<CodeValue> Codes { get; set; } = new BindingList<CodeValue>();
     }
 }

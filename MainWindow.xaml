@@ -4,8 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PureGIS_Geo_QC.WPF"
+        
         xmlns:models="clr-namespace:PureGIS_Geo_QC.Models"
         xmlns:exportModels="clr-namespace:PureGIS_Geo_QC.Exports.Models"
+        
         KeyDown="MainWindow_KeyDown"
         mc:Ignorable="d"
         Title="PureGIS Geo-QC" Height="600" Width="1000"
@@ -17,199 +19,234 @@
     <Window.Resources>
         <local:BoolToCheckMarkConverter x:Key="BoolToCheckMarkConverter"/>
         <local:RemarksConverter x:Key="RemarksConverter"/>
+   
+    <!-- 타이틀바 버튼 스타일 -->
+    <Style x:Key="TitleBarButtonStyle" TargetType="Button">
+        <Setter Property="Foreground" Value="#FFF1F1F1"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="15,5"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#FF555555"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 
-        <!-- 타이틀바 버튼 스타일 -->
-        <Style x:Key="TitleBarButtonStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="#FFF1F1F1"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="15,5"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FF555555"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+    <Style x:Key="CloseButtonStyle" BasedOn="{StaticResource TitleBarButtonStyle}" TargetType="Button">
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#FFE81123"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 
-        <Style x:Key="CloseButtonStyle" BasedOn="{StaticResource TitleBarButtonStyle}" TargetType="Button">
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FFE81123"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <Style TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="Background" Value="#FF3E3E42"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#FF555555"/>
-            <Setter Property="BorderThickness" Value="0,1,1,1"/>
-            <Setter Property="Padding" Value="5"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        </Style>
-        <Style x:Key="ModernButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#FF3E3E42"/>
-            <Setter Property="Foreground" Value="#FFDDDDDD"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#FF555555"/>
-            <Setter Property="Padding" Value="10,6"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
+    <Style TargetType="{x:Type DataGridColumnHeader}">
+        <Setter Property="Background" Value="#FF3E3E42"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderBrush" Value="#FF555555"/>
+        <Setter Property="BorderThickness" Value="0,1,1,1"/>
+        <Setter Property="Padding" Value="5"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+    <Style x:Key="ModernButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="#FF3E3E42"/>
+        <Setter Property="Foreground" Value="#FFDDDDDD"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="#FF555555"/>
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border"
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}"
                         CornerRadius="3">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#FF555555"/>
-                                <Setter TargetName="border" Property="BorderBrush" Value="#FF777777"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#FF2D2D30"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <Style TargetType="{x:Type DataGridCell}">
-            <Setter Property="Background" Value="#FF2D2D30"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="8,0,5,0"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-        </Style>
-        <Style TargetType="{x:Type DataGridRow}">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Style.Triggers>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#FF4A6982"/>
-                    <Setter Property="Foreground" Value="White"/>
-                    <Setter Property="FontWeight" Value="SemiBold"/>
-                </Trigger>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FF3E3E42"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#FF555555"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="#FF777777"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#FF2D2D30"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style TargetType="{x:Type DataGridCell}">
+        <Setter Property="Background" Value="#FF2D2D30"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="8,0,5,0"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+    </Style>
+    <Style TargetType="{x:Type DataGridRow}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="#FF4A6982"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#FF3E3E42"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 
-        <!-- 메뉴 스타일 -->
-        <Style TargetType="{x:Type Menu}">
-            <Setter Property="Background" Value="#FF3F3F46"/>
-            <Setter Property="Foreground" Value="#FFF1F1F1"/>
-        </Style>
+    <!-- 메뉴 스타일 -->
+    <Style TargetType="{x:Type Menu}">
+        <Setter Property="Background" Value="#FF3F3F46"/>
+        <Setter Property="Foreground" Value="#FFF1F1F1"/>
+    </Style>
 
-        <Style TargetType="{x:Type MenuItem}">
-            <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
-            <Setter Property="VerticalContentAlignment" Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#FFF1F1F1"/>
-            <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
-            <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type MenuItem}">
-                        <Border x:Name="templateRoot" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
-                            <Grid Margin="-1">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition x:Name="Col0" MinWidth="22" Width="Auto" SharedSizeGroup="MenuItemIconColumnGroup"/>
-                                    <ColumnDefinition x:Name="Col1" Width="13"/>
-                                    <ColumnDefinition x:Name="Col2" Width="*"/>
-                                    <ColumnDefinition x:Name="Col3" Width="30"/>
-                                    <ColumnDefinition x:Name="Col4" Width="Auto" SharedSizeGroup="MenuItemIGTColumnGroup"/>
-                                    <ColumnDefinition x:Name="Col5" Width="20"/>
-                                </Grid.ColumnDefinitions>
-                                <ContentPresenter x:Name="Icon" ContentSource="Icon" HorizontalAlignment="Center" Height="16" Margin="3" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center" Width="16"/>
-                                <ContentPresenter x:Name="HeaderHost" Grid.Column="2" ContentSource="Header" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                                <TextBlock x:Name="InputGestureText" Grid.Column="4" Margin="{TemplateBinding Padding}" Opacity="0.7" Text="{TemplateBinding InputGestureText}"/>
-                                <Path x:Name="RightArrow" Grid.Column="5" Data="M0,0L4,3.5 0,7z" Fill="{TemplateBinding Foreground}" Margin="4,0,0,0" VerticalAlignment="Center" Visibility="Collapsed"/>
-                                <Popup x:Name="PART_Popup" AllowsTransparency="True" Focusable="False" IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
-                                    <Border x:Name="SubmenuBorder" BorderBrush="#FF555555" BorderThickness="1" Background="#FF2D2D30" Padding="2">
-                                        <ScrollViewer x:Name="SubmenuScrollViewer" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuScrollViewer, TypeInTargetAssembly={x:Type FrameworkElement}}}">
-                                            <ItemsPresenter x:Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Cycle" Grid.IsSharedSizeScope="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" KeyboardNavigation.TabNavigation="Cycle"/>
-                                        </ScrollViewer>
-                                    </Border>
-                                </Popup>
-                            </Grid>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsHighlighted" Value="True">
-                                <Setter Property="Background" TargetName="templateRoot" Value="#FF555555"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Foreground" Value="#FF888888"/>
-                            </Trigger>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="Role" Value="TopLevelHeader"/>
-                                </MultiTrigger.Conditions>
-                                <Setter Property="Padding" Value="10,5"/>
-                                <Setter TargetName="PART_Popup" Property="Placement" Value="Bottom"/>
-                                <Setter TargetName="Col0" Property="MinWidth" Value="0"/>
-                                <Setter TargetName="Col1" Property="Width" Value="0"/>
-                                <Setter TargetName="Col3" Property="Width" Value="0"/>
-                                <Setter TargetName="Col4" Property="Width" Value="0"/>
-                                <Setter TargetName="Col5" Property="Width" Value="0"/>
-                                <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
-                            </MultiTrigger>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="Role" Value="TopLevelItem"/>
-                                </MultiTrigger.Conditions>
-                                <Setter Property="Padding" Value="10,5"/>
-                                <Setter TargetName="Col0" Property="MinWidth" Value="0"/>
-                                <Setter TargetName="Col1" Property="Width" Value="0"/>
-                                <Setter TargetName="Col3" Property="Width" Value="0"/>
-                                <Setter TargetName="Col4" Property="Width" Value="0"/>
-                                <Setter TargetName="Col5" Property="Width" Value="0"/>
-                                <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
-                            </MultiTrigger>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="Role" Value="SubmenuHeader"/>
-                                </MultiTrigger.Conditions>
-                                <Setter Property="Padding" Value="10,5"/>
-                                <Setter TargetName="RightArrow" Property="Visibility" Value="Visible"/>
-                                <Setter TargetName="PART_Popup" Property="Placement" Value="Right"/>
-                            </MultiTrigger>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="Role" Value="SubmenuItem"/>
-                                </MultiTrigger.Conditions>
-                                <Setter Property="Padding" Value="10,5"/>
-                            </MultiTrigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+    <Style TargetType="{x:Type MenuItem}">
+        <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
+        <Setter Property="VerticalContentAlignment" Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="#FFF1F1F1"/>
+        <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
+        <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type MenuItem}">
+                    <Border x:Name="templateRoot" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                        <Grid Margin="-1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition x:Name="Col0" MinWidth="22" Width="Auto" SharedSizeGroup="MenuItemIconColumnGroup"/>
+                                <ColumnDefinition x:Name="Col1" Width="13"/>
+                                <ColumnDefinition x:Name="Col2" Width="*"/>
+                                <ColumnDefinition x:Name="Col3" Width="30"/>
+                                <ColumnDefinition x:Name="Col4" Width="Auto" SharedSizeGroup="MenuItemIGTColumnGroup"/>
+                                <ColumnDefinition x:Name="Col5" Width="20"/>
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter x:Name="Icon" ContentSource="Icon" HorizontalAlignment="Center" Height="16" Margin="3" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center" Width="16"/>
+                            <ContentPresenter x:Name="HeaderHost" Grid.Column="2" ContentSource="Header" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                            <TextBlock x:Name="InputGestureText" Grid.Column="4" Margin="{TemplateBinding Padding}" Opacity="0.7" Text="{TemplateBinding InputGestureText}"/>
+                            <Path x:Name="RightArrow" Grid.Column="5" Data="M0,0L4,3.5 0,7z" Fill="{TemplateBinding Foreground}" Margin="4,0,0,0" VerticalAlignment="Center" Visibility="Collapsed"/>
+                            <Popup x:Name="PART_Popup" AllowsTransparency="True" Focusable="False" IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
+                                <Border x:Name="SubmenuBorder" BorderBrush="#FF555555" BorderThickness="1" Background="#FF2D2D30" Padding="2">
+                                    <ScrollViewer x:Name="SubmenuScrollViewer" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuScrollViewer, TypeInTargetAssembly={x:Type FrameworkElement}}}">
+                                        <ItemsPresenter x:Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Cycle" Grid.IsSharedSizeScope="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" KeyboardNavigation.TabNavigation="Cycle"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter Property="Background" TargetName="templateRoot" Value="#FF555555"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="#FF888888"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Role" Value="TopLevelHeader"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Padding" Value="10,5"/>
+                            <Setter TargetName="PART_Popup" Property="Placement" Value="Bottom"/>
+                            <Setter TargetName="Col0" Property="MinWidth" Value="0"/>
+                            <Setter TargetName="Col1" Property="Width" Value="0"/>
+                            <Setter TargetName="Col3" Property="Width" Value="0"/>
+                            <Setter TargetName="Col4" Property="Width" Value="0"/>
+                            <Setter TargetName="Col5" Property="Width" Value="0"/>
+                            <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Role" Value="TopLevelItem"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Padding" Value="10,5"/>
+                            <Setter TargetName="Col0" Property="MinWidth" Value="0"/>
+                            <Setter TargetName="Col1" Property="Width" Value="0"/>
+                            <Setter TargetName="Col3" Property="Width" Value="0"/>
+                            <Setter TargetName="Col4" Property="Width" Value="0"/>
+                            <Setter TargetName="Col5" Property="Width" Value="0"/>
+                            <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Role" Value="SubmenuHeader"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Padding" Value="10,5"/>
+                            <Setter TargetName="RightArrow" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="PART_Popup" Property="Placement" Value="Right"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Role" Value="SubmenuItem"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Padding" Value="10,5"/>
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
-        <Style TargetType="{x:Type Separator}">
-            <Setter Property="Background" Value="#FF555555"/>
-            <Setter Property="Margin" Value="5,2"/>
-            <Setter Property="Height" Value="1"/>
-        </Style>
+    <Style TargetType="{x:Type Separator}">
+        <Setter Property="Background" Value="#FF555555"/>
+        <Setter Property="Margin" Value="5,2"/>
+        <Setter Property="Height" Value="1"/>
+    </Style>
 
+    <Style TargetType="{x:Type ListView}">
+        <Setter Property="Background" Value="#FF2D2D30"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderBrush" Value="#FF555555"/>
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style TargetType="{x:Type ListViewItem}">
+        <Setter Property="Padding" Value="5"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListViewItem">
+                    <Border x:Name="Bd"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            SnapsToDevicePixels="true">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="true">
+                            <Setter TargetName="Bd" Property="Background" Value="#FF4A6982"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter TargetName="Bd" Property="Background" Value="#FF3E3E42"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
     </Window.Resources>
-
+    
     <Border BorderBrush="#FF555555" BorderThickness="1">
         <DockPanel>
             <!-- 커스텀 타이틀바 -->
@@ -424,7 +461,7 @@
 
                                 <DataGrid Name="StandardGrid" AutoGenerateColumns="False" 
                                           CanUserAddRows="False" Background="#FF2D2D30" Foreground="White" BorderBrush="Gray" RowHeight="28"
-                                          IsReadOnly="False"
+                                          IsReadOnly="True"
                                           SelectionUnit="Cell"
                                           SelectionMode="Extended">
                                     <DataGrid.Columns>
@@ -460,6 +497,8 @@
                                                 </Style>
                                             </DataGridTextColumn.ElementStyle>
                                         </DataGridTextColumn>
+                                        <DataGridCheckBoxColumn Header="NOT NULL" Binding="{Binding IsNotNull}" Width="80"/>
+                                        <DataGridTextColumn Header="코드명" Binding="{Binding CodeName}" Width="*"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </DockPanel>
@@ -471,6 +510,56 @@
                         <StackPanel Orientation="Horizontal">
                             <Border Width="20" Height="20" CornerRadius="10" Background="#FF555555" Margin="0,0,8,0">
                                 <TextBlock Text="2" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="코드 관리" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="300"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Background="#FF3E3E42" CornerRadius="5" Margin="10">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="코드 그룹" Foreground="White" FontSize="16" Margin="10" FontWeight="Bold"/>
+                                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                                    <Button Name="AddCodeSetButton" Content="추가" Width="80" Click="AddCodeSetButton_Click" Style="{StaticResource ModernButtonStyle}"/>
+                                    <Button Name="EditCodeSetButton" Content="수정" Width="80" Margin="10,0" Click="EditCodeSetButton_Click" Style="{StaticResource ModernButtonStyle}"/>
+                                    <Button Name="DeleteCodeSetButton" Content="삭제" Width="80" Click="DeleteCodeSetButton_Click" Style="{StaticResource ModernButtonStyle}" Background="#b03a2e" Foreground="White"/>
+                                </StackPanel>
+                                <ListView Name="CodeSetListView" Margin="10,0,10,10" SelectionChanged="CodeSetListView_SelectionChanged" DisplayMemberPath="CodeName"/>
+                            </DockPanel>
+                        </Border>
+
+                        <GridSplitter Grid.Column="1" Width="5" Background="#FF555555" HorizontalAlignment="Stretch"/>
+
+                        <Border Grid.Column="2" Background="#FF3E3E42" CornerRadius="5" Margin="10">
+                            <DockPanel>
+                                <TextBlock Name="SelectedCodeSetHeader" DockPanel.Dock="Top" Text="코드 그룹을 선택하세요" Foreground="White" FontSize="16" Margin="10" FontWeight="Bold"/>
+                                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                                    <Button Name="AddCodeButton" Content="추가" Width="80" Click="AddCodeButton_Click" Style="{StaticResource ModernButtonStyle}"/>
+                                    <Button Name="EditCodeButton" Content="수정" Width="80" Margin="10,0" Click="EditCodeButton_Click" Style="{StaticResource ModernButtonStyle}"/>
+                                    <Button Name="DeleteCodeButton" Content="삭제" Width="80" Click="DeleteCodeButton_Click" Style="{StaticResource ModernButtonStyle}" Background="#b03a2e" Foreground="White"/>
+                                </StackPanel>
+
+                                <DataGrid Name="CodeDataGrid" Margin="10,0,10,10" AutoGenerateColumns="False" 
+                                          CanUserAddRows="False" Background="#FF2D2D30" IsReadOnly="False">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="코드" Binding="{Binding Code}" Width="*"/>
+                                        <DataGridTextColumn Header="코드명(한글)" Binding="{Binding Description}" Width="2*"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Border Width="20" Height="20" CornerRadius="10" Background="#FF555555" Margin="0,0,8,0">
+                                <TextBlock Text="3" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <TextBlock Text="파일 검사" VerticalAlignment="Center"/>
                         </StackPanel>
@@ -529,7 +618,7 @@
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
                             <Border Width="20" Height="20" CornerRadius="10" Background="#FF555555" Margin="0,0,8,0">
-                                <TextBlock Text="3" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="4" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <TextBlock Text="결과 리포트" VerticalAlignment="Center"/>
                         </StackPanel>
@@ -816,6 +905,12 @@
                                                     </Style>
                                                 </DataGridTextColumn.ElementStyle>
                                             </DataGridTextColumn>
+                                            <DataGridTextColumn Header="NULL허용" Binding="{Binding IsNotNullCorrect, Converter={StaticResource BoolToCheckMarkConverter}}" Width="70"/>
+                                            <DataGridTextColumn Header="코드일치" Binding="{Binding IsCodeCorrect, Converter={StaticResource BoolToCheckMarkConverter}}" Width="70"/>
+
+                                            <DataGridTextColumn Header="NULL오류" Binding="{Binding NotNullErrorCount}" Width="80"/>
+                                            <DataGridTextColumn Header="코드오류" Binding="{Binding CodeErrorCount}" Width="80"/>
+
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </DockPanel>
