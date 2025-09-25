@@ -462,8 +462,8 @@
                                 </Border>
 
                                 <DataGrid Name="StandardGrid" AutoGenerateColumns="False" 
-                                          CanUserAddRows="False" Background="#FF2D2D30" Foreground="White" BorderBrush="Gray" RowHeight="28"
-                                          IsReadOnly="True"
+                                          CanUserAddRows="False" Background="#FF2D2D30" Foreground="White" BorderBrush="Gray" RowHeight="28"                                          
+                                          IsReadOnly="False"
                                           SelectionUnit="Cell"
                                           SelectionMode="Extended">
                                     <DataGrid.Columns>
@@ -547,7 +547,7 @@
                                 </StackPanel>
 
                                 <DataGrid Name="CodeDataGrid" Margin="10,0,10,10" AutoGenerateColumns="False" 
-                                          CanUserAddRows="False" Background="#FF2D2D30">
+                                          CanUserAddRows="False" Background="#FF2D2D30" IsReadOnly="False">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="코드" Binding="{Binding Code}" Width="*"/>
                                         <DataGridTextColumn Header="코드명(한글)" Binding="{Binding Description}" Width="2*"/>
@@ -907,12 +907,77 @@
                                                     </Style>
                                                 </DataGridTextColumn.ElementStyle>
                                             </DataGridTextColumn>
-                                            <DataGridTextColumn Header="NULL허용" Binding="{Binding IsNotNullCorrect, Converter={StaticResource BoolToCheckMarkConverter}}" Width="70"/>
-                                            <DataGridTextColumn Header="코드일치" Binding="{Binding IsCodeCorrect, Converter={StaticResource BoolToCheckMarkConverter}}" Width="70"/>
+                                            <DataGridTextColumn Header="NULL허용" Binding="{Binding IsNotNullCorrect, Converter={StaticResource BoolToCheckMarkConverter}}" Width="70">
+                                                <DataGridTextColumn.ElementStyle>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                                        <Setter Property="FontWeight" Value="Bold"/>
+                                                        <Setter Property="FontSize" Value="16"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsNotNullCorrect}" Value="True">
+                                                                <Setter Property="Foreground" Value="LightGreen"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsNotNullCorrect}" Value="False">
+                                                                <Setter Property="Foreground" Value="LightCoral"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </DataGridTextColumn.ElementStyle>
+                                            </DataGridTextColumn>
 
-                                            <DataGridTextColumn Header="NULL오류" Binding="{Binding NotNullErrorCount}" Width="80"/>
-                                            <DataGridTextColumn Header="코드오류" Binding="{Binding CodeErrorCount}" Width="80"/>
+                                            <DataGridTextColumn Header="코드일치" Binding="{Binding IsCodeCorrect, Converter={StaticResource BoolToCheckMarkConverter}}" Width="70">
+                                                <DataGridTextColumn.ElementStyle>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                                        <Setter Property="FontWeight" Value="Bold"/>
+                                                        <Setter Property="FontSize" Value="16"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsCodeCorrect}" Value="True">
+                                                                <Setter Property="Foreground" Value="LightGreen"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsCodeCorrect}" Value="False">
+                                                                <Setter Property="Foreground" Value="LightCoral"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </DataGridTextColumn.ElementStyle>
+                                            </DataGridTextColumn>
 
+                                            <DataGridTextColumn Header="NULL오류" Binding="{Binding NotNullErrorCount}" Width="80">
+                                                <DataGridTextColumn.ElementStyle>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                                        <Setter Property="FontWeight" Value="Bold"/>
+                                                        <Setter Property="FontSize" Value="14"/>
+                                                        <Setter Property="Foreground" Value="LightCoral"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding NotNullErrorCount}" Value="0">
+                                                                <Setter Property="Foreground" Value="LightGreen"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </DataGridTextColumn.ElementStyle>
+                                            </DataGridTextColumn>
+
+                                            <DataGridTextColumn Header="코드오류" Binding="{Binding CodeErrorCount}" Width="80">
+                                                <DataGridTextColumn.ElementStyle>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                                        <Setter Property="FontWeight" Value="Bold"/>
+                                                        <Setter Property="FontSize" Value="14"/>
+                                                        <Setter Property="Foreground" Value="LightCoral"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding CodeErrorCount}" Value="0">
+                                                                <Setter Property="Foreground" Value="LightGreen"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </DataGridTextColumn.ElementStyle>
+                                            </DataGridTextColumn>                                        
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </DockPanel>
