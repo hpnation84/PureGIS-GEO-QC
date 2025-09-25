@@ -2,11 +2,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using DocumentFormat.OpenXml.Spreadsheet;
 using PureGIS_Geo_QC.Models; // 네임스페이스는 실제 프로젝트에 맞게 조정하세요.
 using PureGIS_Geo_QC.WPF;
+using PureGIS_Geo_QC.Helpers;
 using ColumnDefinition = PureGIS_Geo_QC.Models.ColumnDefinition;
 
 namespace PureGIS_Geo_QC_Standalone
@@ -425,186 +428,47 @@ namespace PureGIS_Geo_QC_Standalone
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("=== PasteColumnsToCurrentTable 시작 ===");
-
-                // 1. 선택된 테이블 확인
-                System.Diagnostics.Debug.WriteLine($"currentSelectedTable null 체크: {currentSelectedTable == null}");
                 if (currentSelectedTable == null)
                 {
                     CustomMessageBox.Show(this, "알림", "컬럼을 추가할 테이블을 먼저 선택하세요.");
                     return;
                 }
 
-                System.Diagnostics.Debug.WriteLine($"선택된 테이블: {currentSelectedTable.TableName}");
-                System.Diagnostics.Debug.WriteLine($"기존 컬럼 수: {currentSelectedTable.Columns?.Count ?? 0}");
-
-                // 2. 클립보드 텍스트 가져오기
-                string clipboardText = null;
-                try
-                {
-                    System.Diagnostics.Debug.WriteLine("클립보드 텍스트 가져오는 중...");
-                    clipboardText = Clipboard.GetText();
-                    System.Diagnostics.Debug.WriteLine($"클립보드 텍스트 길이: {clipboardText?.Length ?? 0}");
-                    if (!string.IsNullOrEmpty(clipboardText))
-                    {
-                        System.Diagnostics.Debug.WriteLine($"클립보드 내용 일부: {clipboardText.Substring(0, Math.Min(100, clipboardText.Length))}");
-                    }
-                }
-                catch (Exception clipEx)
-                {
-                    System.Diagnostics.Debug.WriteLine($"클립보드 오류: {clipEx.Message}");
-                    CustomMessageBox.Show(this, "오류", $"클립보드에서 텍스트를 가져올 수 없습니다: {clipEx.Message}");
-                    return;
-                }
-
+                string clipboardText = Clipboard.GetText();
                 if (string.IsNullOrWhiteSpace(clipboardText))
                 {
                     CustomMessageBox.Show(this, "알림", "클립보드가 비어있습니다.");
                     return;
                 }
 
-                // 3. 컬럼 데이터 파싱
-                System.Diagnostics.Debug.WriteLine("컬럼 데이터 파싱 중...");
-                var newColumns = ParseColumnsFromClipboard(clipboardText);
-                if (newColumns == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("파싱 결과가 null입니다.");
-                    CustomMessageBox.Show(this, "오류", "컬럼 데이터 파싱에 실패했습니다.");
-                    return;
-                }
-
-                System.Diagnostics.Debug.WriteLine($"파싱된 컬럼 수: {newColumns.Count}");
+                // ClipboardHelper를 사용하여 파싱
+                var newColumns = ClipboardHelper.ParseColumnsFromClipboard(clipboardText);
 
                 if (newColumns.Count > 0)
                 {
-                    // 4. 컬럼 추가
-                    System.Diagnostics.Debug.WriteLine("컬럼 추가 중...");
+                    // ===== 👇 [수정] AddRange 대신 하나씩 추가하도록 변경합니다. =====
                     if (currentSelectedTable.Columns == null)
                     {
-                        System.Diagnostics.Debug.WriteLine("Columns 리스트가 null이므로 새로 생성합니다.");
-                        currentSelectedTable.Columns = new List<ColumnDefinition>();
+                        currentSelectedTable.Columns = new BindingList<ColumnDefinition>();
                     }
 
-                    currentSelectedTable.Columns.AddRange(newColumns);
-                    System.Diagnostics.Debug.WriteLine($"컬럼 추가 완료. 총 컬럼 수: {currentSelectedTable.Columns.Count}");
-
-                    // 5. UI 업데이트
-                    System.Diagnostics.Debug.WriteLine("UI 업데이트 중...");
-                    try
+                    foreach (var col in newColumns)
                     {
-                        RefreshSelectedTableGrid();
-                        System.Diagnostics.Debug.WriteLine("DataGrid 새로고침 완료");
-                    }
-                    catch (Exception gridEx)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"DataGrid 새로고침 오류: {gridEx.Message}");
+                        currentSelectedTable.Columns.Add(col);
                     }
 
-                    try
-                    {
-                        UpdateTableList(); // ListBox 업데이트
-                        System.Diagnostics.Debug.WriteLine("ListBox 업데이트 완료");
-                    }
-                    catch (Exception listEx)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"ListBox 업데이트 오류: {listEx.Message}");
-                    }
-
-                    // 6. 헤더 업데이트 (이 부분에서 오류 발생 가능성 높음)
-                    System.Diagnostics.Debug.WriteLine("헤더 업데이트 중...");
-                    try
-                    {
-                        ShowTableInfo(currentSelectedTable);
-                        System.Diagnostics.Debug.WriteLine("헤더 업데이트 완료");
-                    }
-                    catch (Exception headerEx)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"헤더 업데이트 오류: {headerEx.Message}");
-                        System.Diagnostics.Debug.WriteLine($"헤더 업데이트 스택트레이스: {headerEx.StackTrace}");
-                        // 헤더 업데이트 실패해도 계속 진행
-                    }
-
-                    // 7. 성공 메시지
-                    System.Diagnostics.Debug.WriteLine("성공 메시지 표시 중...");
-                    string tableName = currentSelectedTable?.TableName ?? "테이블";
-                    CustomMessageBox.Show(this, "완료", $"{newColumns.Count}개의 컬럼이 '{tableName}' 에 추가되었습니다.");
+                    // BindingList를 사용하면 UI가 자동으로 업데이트되므로 RefreshSelectedTableGrid() 호출은 필요 없습니다.
+                    ShowTableInfo(currentSelectedTable); // 테이블 정보(컬럼 개수 등) 업데이트
+                    CustomMessageBox.Show(this, "완료", $"{newColumns.Count}개의 컬럼이 '{currentSelectedTable.TableName}' 테이블에 추가되었습니다.");
                 }
                 else
                 {
-                    CustomMessageBox.Show(this, "오류", "올바른 컬럼 데이터를 찾을 수 없습니다.\n\n형식: 컬럼ID [Tab] 컬럼명 [Tab] 타입 [Tab] 길이");
-                }
-
-                System.Diagnostics.Debug.WriteLine("=== PasteColumnsToCurrentTable 완료 ===");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"=== PasteColumnsToCurrentTable 전체 오류 ===");
-                System.Diagnostics.Debug.WriteLine($"오류 메시지: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"오류 위치: {ex.TargetSite}");
-                System.Diagnostics.Debug.WriteLine($"스택 트레이스: {ex.StackTrace}");
-                System.Diagnostics.Debug.WriteLine($"=== 오류 정보 끝 ===");
-
-                CustomMessageBox.Show(this, "파싱 오류", $"컬럼 데이터 붙여넣기 중 오류가 발생했습니다:\n\n{ex.Message}\n\n자세한 정보는 디버그 출력을 확인하세요.");
-            }
-        }
-        /// <summary>
-        /// 클립보드에서 컬럼 데이터만 파싱 (Null 안전 버전)
-        /// </summary>
-        private List<ColumnDefinition> ParseColumnsFromClipboard(string clipboardText)
-        {
-            var columns = new List<ColumnDefinition>();
-
-            try
-            {
-                if (string.IsNullOrWhiteSpace(clipboardText))
-                {
-                    return columns;
-                }
-
-                var lines = clipboardText.Trim().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (var line in lines)
-                {
-                    if (string.IsNullOrWhiteSpace(line)) continue;
-
-                    var cols = line.Split('\t');
-                    if (cols.Length < 2) continue; // 최소 2개 컬럼은 있어야 함
-
-                    columns.Add(new ColumnDefinition
-                    {
-                        ColumnId = GetSafeArrayValue(cols, 0, "COL_" + DateTime.Now.Ticks.ToString().Substring(10)),
-                        ColumnName = GetSafeArrayValue(cols, 1, "컬럼_" + columns.Count),
-                        Type = GetSafeArrayValue(cols, 2, "VARCHAR2"),
-                        Length = GetSafeArrayValue(cols, 3, "50"),
-                        IsNotNull = false, // 기본값
-                        KeyType = "" // 기본값
-                    });
+                    CustomMessageBox.Show(this, "오류", "올바른 컬럼 데이터를 찾을 수 없습니다.\n\n형식: 컬럼ID [Tab] 컬럼명 [Tab] 타입 [Tab] 길이 [Tab] NOTNULL(Y/N) [Tab] 코드명");
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"ParseColumnsFromClipboard 오류: {ex.Message}");
-                // 빈 리스트 반환
-            }
-
-            return columns;
-        }
-        // <summary>
-        /// 선택된 테이블의 DataGrid 새로고침 (Null 안전 버전)
-        /// </summary>
-        private void RefreshSelectedTableGrid()
-        {
-            try
-            {
-                if (currentSelectedTable != null && StandardGrid != null)
-                {
-                    StandardGrid.ItemsSource = null;
-                    StandardGrid.ItemsSource = currentSelectedTable.Columns;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"RefreshSelectedTableGrid 오류: {ex.Message}");
+                CustomMessageBox.Show(this, "파싱 오류", $"컬럼 데이터 붙여넣기 중 오류가 발생했습니다:\n\n{ex.Message}");
             }
         }
         // =======================================================

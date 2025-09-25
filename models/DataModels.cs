@@ -65,7 +65,7 @@ namespace PureGIS_Geo_QC.Models
     {
         public string TableId { get; set; }
         public string TableName { get; set; }
-        public List<ColumnDefinition> Columns { get; set; } = new List<ColumnDefinition>();
+        public BindingList<ColumnDefinition> Columns { get; set; } = new BindingList<ColumnDefinition>();
     }        
     // 검증 결과를 담는 클래스
     public class ColumnValidationResult
@@ -150,7 +150,7 @@ namespace PureGIS_Geo_QC.Models
     {
         public string CodeName { get; set; } // 예: FTR_CDE
 
-        // ===== 👇 [수정] List를 BindingList로 변경합니다. =====
+        // ===== 👇 [수정] List를 BindingList로 변경합니다. =====        
         public BindingList<CodeValue> Codes { get; set; } = new BindingList<CodeValue>();
     }
 }

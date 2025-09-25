@@ -120,7 +120,6 @@ namespace PureGIS_Geo_QC_Standalone
             if (CodeSetListView.SelectedItem is CodeSet selectedCodeSet)
             {
                 SelectedCodeSetHeader.Text = $"'{selectedCodeSet.CodeName}' 코드 목록";
-
                 // ===== 👇 [수정] OrderBy를 제거하여 BindingList가 직접 연결되도록 합니다. =====
                 CodeDataGrid.ItemsSource = selectedCodeSet.Codes;
             }
@@ -129,6 +128,69 @@ namespace PureGIS_Geo_QC_Standalone
                 SelectedCodeSetHeader.Text = "코드 그룹을 선택하세요";
                 CodeDataGrid.ItemsSource = null;
             }
+        }
+        /// <summary>
+        /// 현재 선택된 코드 그룹에 클립보드 데이터 붙여넣기
+        /// </summary>
+        private void PasteCodesToCurrentCodeSet()
+        {
+            if (CodeSetListView.SelectedItem is CodeSet selectedCodeSet)
+            {
+                try
+                {
+                    string clipboardText = Clipboard.GetText();
+                    if (string.IsNullOrWhiteSpace(clipboardText)) return;
+
+                    var newCodes = ParseCodesFromClipboard(clipboardText);
+
+                    if (newCodes.Count > 0)
+                    {
+                        foreach (var newCode in newCodes)
+                        {
+                            // 중복 코드 확인
+                            if (!selectedCodeSet.Codes.Any(c => c.Code.Equals(newCode.Code, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                selectedCodeSet.Codes.Add(newCode);
+                            }
+                        }
+                        // BindingList는 자동으로 UI를 업데이트하므로 별도의 새로고침 코드가 필요 없습니다.
+                        CustomMessageBox.Show(this, "완료", $"{newCodes.Count}개의 코드가 붙여넣어졌습니다.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    CustomMessageBox.Show(this, "붙여넣기 오류", $"데이터 붙여넣기 중 오류 발생: {ex.Message}");
+                }
+            }
+            else
+            {
+                CustomMessageBox.Show(this, "알림", "코드값을 추가할 코드 그룹을 먼저 선택하세요.");
+            }
+        }
+
+        /// <summary>
+        /// 클립보드 텍스트를 파싱하여 CodeValue 리스트로 변환
+        /// </summary>
+        private List<CodeValue> ParseCodesFromClipboard(string clipboardText)
+        {
+            var codeValues = new List<CodeValue>();
+            var lines = clipboardText.Trim().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                var cols = line.Split('\t'); // 탭으로 열 구분
+                if (cols.Length >= 1)
+                {
+                    codeValues.Add(new CodeValue
+                    {
+                        Code = cols[0].Trim(),
+                        Description = cols.Length > 1 ? cols[1].Trim() : ""
+                    });
+                }
+            }
+            return codeValues;
         }
 
         /// <summary>
@@ -220,72 +282,6 @@ namespace PureGIS_Geo_QC_Standalone
             {
                 CustomMessageBox.Show(this, "알림", "삭제할 코드를 선택하세요.");
             }
-        }
-        /// <summary>
-        /// 현재 선택된 코드 그룹에 클립보드 데이터 붙여넣기
-        /// </summary>
-        private void PasteCodesToCurrentCodeSet()
-        {
-            if (CodeSetListView.SelectedItem is CodeSet selectedCodeSet)
-            {
-                try
-                {
-                    string clipboardText = Clipboard.GetText();
-                    if (string.IsNullOrWhiteSpace(clipboardText)) return;
-
-                    var newCodes = ParseCodesFromClipboard(clipboardText);
-
-                    if (newCodes.Count > 0)
-                    {
-                        foreach (var newCode in newCodes)
-                        {
-                            // 중복 코드 확인
-                            if (!selectedCodeSet.Codes.Any(c => c.Code.Equals(newCode.Code, StringComparison.OrdinalIgnoreCase)))
-                            {
-                                selectedCodeSet.Codes.Add(newCode);
-                            }
-                        }
-                        // DataGrid UI 새로고침 (BindingList는 자동으로 UI를 업데이트하므로 이 줄은 선택사항)
-                        CodeDataGrid.ItemsSource = null;
-                        CodeDataGrid.ItemsSource = selectedCodeSet.Codes;
-                        CustomMessageBox.Show(this, "완료", $"{newCodes.Count}개의 코드가 붙여넣어졌습니다.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    CustomMessageBox.Show(this, "붙여넣기 오류", $"데이터 붙여넣기 중 오류 발생: {ex.Message}");
-                }
-            }
-            else
-            {
-                CustomMessageBox.Show(this, "알림", "코드값을 추가할 코드 그룹을 먼저 선택하세요.");
-            }
-        }
-
-        /// <summary>
-        /// 클립보드 텍스트를 파싱하여 CodeValue 리스트로 변환
-        /// </summary>
-        private List<CodeValue> ParseCodesFromClipboard(string clipboardText)
-        {
-            var codeValues = new List<CodeValue>();
-            var lines = clipboardText.Trim().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (var line in lines)
-            {
-                if (string.IsNullOrWhiteSpace(line)) continue;
-
-                var cols = line.Split('\t'); // 탭으로 열 구분
-                if (cols.Length >= 1)
-                {
-                    codeValues.Add(new CodeValue
-                    {
-                        Code = cols[0].Trim(),
-                        // 설명(한글명)은 있을 수도 있고 없을 수도 있음
-                        Description = cols.Length > 1 ? cols[1].Trim() : ""
-                    });
-                }
-            }
-            return codeValues;
-        }
+        }        
     }
 }
