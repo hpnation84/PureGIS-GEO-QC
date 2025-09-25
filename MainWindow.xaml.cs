@@ -25,11 +25,13 @@ using PureGIS_Geo_QC.Exports.Models;
 using PureGIS_Geo_QC.Licensing;
 using PureGIS_Geo_QC.Managers;
 using PureGIS_Geo_QC.Models;
+using PureGIS_Geo_QC.WPF;
+
 // 이름 충돌을 피하기 위한 using 별칭(alias) 사용
 using ColumnDefinition = PureGIS_Geo_QC.Models.ColumnDefinition;
 using TableDefinition = PureGIS_Geo_QC.Models.TableDefinition;
 
-namespace PureGIS_Geo_QC.WPF
+namespace PureGIS_Geo_QC_Standalone
 {
     /// <summary>
     /// MainWindow.xaml에 대한 상호 작용 논리
@@ -48,8 +50,7 @@ namespace PureGIS_Geo_QC.WPF
         private ProjectDefinition currentProject = null;
         private TableDefinition currentSelectedTable = null;
         public List<string> ColumnTypes { get; } = new List<string> { "VARCHAR2", "NUMBER", "DATE" };
-        
-        public MainWindow(bool isTrial = false)
+        public MainWindow()
         {
             // =======================================================
             // ✨ PdfSharpCore 폰트 리졸버를 전역으로 설정
@@ -59,7 +60,7 @@ namespace PureGIS_Geo_QC.WPF
             this.DataContext = this;
 
             // 전달받은 값으로 체험판 모드 설정
-            this.IsTrialMode = isTrial;
+        //    this.IsTrialMode = isTrial;
 
             // 창 제목에 체험판 표시
             if (this.IsTrialMode)
@@ -343,7 +344,7 @@ namespace PureGIS_Geo_QC.WPF
                 HideTableInfo();
                 CustomMessageBox.Show(this, "완료", "테이블이 삭제되었습니다.");
             }
-        }               
+        }
 
         /// <summary>
         /// 테이블 목록 업데이트 (Null 안전 버전)
@@ -892,7 +893,7 @@ namespace PureGIS_Geo_QC.WPF
                 summary += $"\n{skippedCount}개 파일은 일치하는 기준 테이블이 없어 건너뛰었습니다.";
             }
             CustomMessageBox.Show(this, "검사 완료", summary);
-        }                
+        }
         /// <summary>
         /// 단일 파일 검사 후 결과를 List로 반환하는 메서드
         /// </summary>
@@ -1061,7 +1062,7 @@ namespace PureGIS_Geo_QC.WPF
 
                 }
 
-                
+
             }
             catch (Exception ex)
             {
@@ -1122,13 +1123,13 @@ namespace PureGIS_Geo_QC.WPF
         private (int Precision, int Scale) ParseStandardLength(string lengthString)
         {
             if (string.IsNullOrWhiteSpace(lengthString)) return (0, 0);
-                  // 쉼표가 포함되어 있는지 확인
+            // 쉼표가 포함되어 있는지 확인
             if (lengthString.Contains(","))
             {
                 var parts = lengthString.Split(',');
                 if (parts.Length == 2 && int.TryParse(parts[0], out int precision) && int.TryParse(parts[1], out int scale))
                 {
-                            // 쉼표 앞은 전체 자릿수, 뒤는 소수점 자릿수로 변환
+                    // 쉼표 앞은 전체 자릿수, 뒤는 소수점 자릿수로 변환
                     return (precision, scale);
                 }
             }
@@ -1142,8 +1143,8 @@ namespace PureGIS_Geo_QC.WPF
             }
             return (0, 0);
         }
-        #endregion  
-                
+        #endregion
+
         /// <summary>
         /// DBF 파일에서 필드의 타입을 추출
         /// </summary>
@@ -1386,15 +1387,7 @@ namespace PureGIS_Geo_QC.WPF
         }
         #endregion
         #region Export Methods
-
-        /// <summary>
-        /// QuestPDF로 내보내기
-        /// </summary>
-        private void ExportQuestPdfButton_Click(object sender, RoutedEventArgs e)
-        {
-            ExportReport(new QuestPdfExporter());
-        }
-
+               
         /// <summary>
         /// PdfSharp로 내보내기
         /// </summary>

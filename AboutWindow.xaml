@@ -95,7 +95,7 @@
                                 <Image Source="img/Geo_QC.ico" Width="48" Height="48" Margin="0,0,15,0"/>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="PureGIS Geo-QC" FontSize="24" FontWeight="Bold" Foreground="White"/>
-                                    <TextBlock Text="지리정보 품질검사 도구" FontSize="14" Foreground="#FFAAAAAA" Margin="0,5,0,0"/>
+                                    <TextBlock Text="지리정보 데이터형식 품질검사 도구" FontSize="14" Foreground="#FFAAAAAA" Margin="0,5,0,0"/>
                                     <TextBlock x:Name="LicenseStatusText" Text="라이선스: 미인증" FontSize="12" Foreground="#FFFF6B6B" Margin="0,3,0,0"/>
                                 </StackPanel>
                             </StackPanel>
@@ -127,7 +127,7 @@
                                     <TextBlock Grid.Row="4" Grid.Column="1" Text="PureGIS Team (CREW JIN,HONG)" Foreground="White"/>
 
                                     <TextBlock Grid.Row="6" Grid.Column="0" Text="플랫폼:" Foreground="#FFAAAAAA" FontWeight="Bold"/>
-                                    <TextBlock Grid.Row="6" Grid.Column="1" Text=".NET Framework 4.8 / WPF" Foreground="White"/>
+                                    <TextBlock Grid.Row="6" Grid.Column="1" Text=".NET Framework 4.8 / WPF / AutoCad Map3D 2023+" Foreground="White"/>
                                 </Grid>
                             </Border>
 
@@ -143,21 +143,7 @@
                                     <TextBlock Text="• PDF, Word 형식 보고서 생성" Foreground="#FFDDDDDD" Margin="0,0,0,8"/>
                                     <TextBlock Text="• AutoCAD 플러그인 지원" Foreground="#FFDDDDDD"/>
                                 </StackPanel>
-                            </Border>
-
-                            <!-- 사용 라이브러리 -->
-                            <ScrollViewer Grid.Row="8" VerticalScrollBarVisibility="Auto" Margin="0,10,0,0">
-                                <Border Background="#FF3E3E42" CornerRadius="5" Padding="20">
-                                    <StackPanel>
-                                        <TextBlock Text="사용 라이브러리" FontSize="14" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
-                                        <TextBlock Text="• DotSpatial - 지리정보 데이터 처리" Foreground="#FFCCCCCC" Margin="0,0,0,5"/>                                        
-                                        <TextBlock Text="• PdfSharpCore - PDF 처리" Foreground="#FFCCCCCC" Margin="0,0,0,5"/>
-                                        <TextBlock Text="• DocumentFormat.OpenXml - Word 문서 생성" Foreground="#FFCCCCCC" Margin="0,0,0,5"/>
-                                        <TextBlock Text="• Newtonsoft.Json - JSON 직렬화" Foreground="#FFCCCCCC" Margin="0,0,0,5"/>
-                                        <TextBlock Text="• Autodesk AutoCAD .NET API" Foreground="#FFCCCCCC"/>
-                                    </StackPanel>
-                                </Border>
-                            </ScrollViewer>
+                            </Border>                            
                         </Grid>
                     </ScrollViewer>
                 </TabItem>
@@ -170,7 +156,7 @@
                                 <TextBlock Text="PureGIS Geo-QC 소프트웨어 라이선스 계약서" FontSize="16" FontWeight="Bold" Foreground="#FF3498DB" Margin="0,0,0,15"/>
 
                                 <TextBlock Text="제1조 (라이선스 정의)" FontWeight="Bold" Foreground="White" Margin="0,0,0,8"/>
-                                <TextBlock Text="본 소프트웨어는 PureGIS Team이 개발한 지리정보 품질검사 도구로, 유료 라이선스를 통해서만 사용할 수 있습니다. 라이선스는 개인 또는 법인이 구매할 수 있으며, 구매한 라이선스는 계약에 명시된 기간 동안 유효합니다." 
+                                <TextBlock Text="본 소프트웨어는 PureGIS Team이 개발한 지리정보 품질검사 도구로, 현재는 무료로 배포 되고 있지만, 추후 유료 라이선스를 통해서만 사용할 수 있습니다. 라이선스는 개인 또는 법인이 구매할 수 있으며, 구매한 라이선스는 계약에 명시된 기간 동안 유효합니다." 
                                            Foreground="#FFCCCCCC" TextWrapping="Wrap" Margin="0,0,0,15"/>
 
                                 <TextBlock Text="제2조 (사용 권한 및 제한)" FontWeight="Bold" Foreground="White" Margin="0,0,0,8"/>
@@ -205,9 +191,27 @@
                                     <StackPanel>
                                         <TextBlock Text="연락처 정보" FontWeight="Bold" Foreground="#FF3498DB" Margin="0,0,0,8"/>
                                         <TextBlock Text="개발사: PureGIS Team" Foreground="White"/>
-                                        <TextBlock Text="웹사이트: https://www.jindigo.kr" Foreground="White"/>
-                                        <TextBlock Text="지원 이메일: support@jindigo.kr" Foreground="White"/>
-                                        <TextBlock Text="영업 문의: sales@jindigo.kr" Foreground="White"/>
+
+                                        <TextBlock Foreground="White">
+                                            웹사이트:
+                                            <Hyperlink NavigateUri="https://www.jindigo.kr" RequestNavigate="Hyperlink_RequestNavigate" Foreground="#FF5DADE2">
+                                                https://www.jindigo.kr
+                                            </Hyperlink>
+                                        </TextBlock>
+
+                                        <TextBlock Foreground="White">
+                                               지원 이메일:
+                                               <Hyperlink NavigateUri="mailto:hpnation84@naver.com" RequestNavigate="Hyperlink_RequestNavigate" Foreground="#FF5DADE2">
+                                                   hpnation84@naver.com
+                                               </Hyperlink>
+                                        </TextBlock>
+
+                                        <TextBlock Foreground="White">
+            개발자 개인 KAKAO TALK:
+            <Hyperlink NavigateUri="https://open.kakao.com/o/smlP59id" RequestNavigate="Hyperlink_RequestNavigate" Foreground="#FF5DADE2">
+                오픈채팅 바로가기
+            </Hyperlink>
+                                        </TextBlock>
                                     </StackPanel>
                                 </Border>
 

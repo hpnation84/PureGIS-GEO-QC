@@ -2,6 +2,9 @@
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Diagnostics; // Process.Start를 위해 필요
+using System.Windows.Navigation; // RequestNavigateEventArgs를 위해 필요
 
 namespace PureGIS_Geo_QC.WPF
 {
@@ -42,7 +45,23 @@ namespace PureGIS_Geo_QC.WPF
                 System.Diagnostics.Debug.WriteLine($"버전 정보 로드 오류: {ex.Message}");
             }
         }
-
+        /// <summary>
+        /// 라이선스 상태를 받아서 UI를 업데이트하는 메서드
+        /// </summary>
+        public void UpdateLicenseStatus(bool isTrial, bool isAuthenticated, string companyName, string expiryDate)
+        {
+            if (isTrial)
+            {
+                LicenseStatusText.Text = "라이선스: 체험판";
+                LicenseStatusText.Foreground = new SolidColorBrush(Color.FromRgb(243, 156, 18)); // 주황색 계열
+            }
+            else if (isAuthenticated)
+            {
+                LicenseStatusText.Text = $"라이선스: 정식 ({companyName} / 만료일: {expiryDate})";
+                LicenseStatusText.Foreground = new SolidColorBrush(Color.FromRgb(46, 204, 113)); // 녹색 계열
+            }
+            // 미인증 상태는 XAML의 기본값으로 유지됩니다.
+        }
         /// <summary>
         /// 어셈블리 빌드 날짜 계산
         /// </summary>
@@ -83,6 +102,22 @@ namespace PureGIS_Geo_QC.WPF
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+        /// <summary>
+        /// XAML의 Hyperlink 태그에서 호출하는 이벤트 핸들러입니다.
+        /// </summary>
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            try
+            {
+                // 기본 브라우저로 링크를 엽니다.
+                Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+                e.Handled = true; // 이벤트 처리를 완료했음을 알립니다.
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"링크를 여는 중 오류가 발생했습니다: {ex.Message}");
+            }
         }
 
         /// <summary>
