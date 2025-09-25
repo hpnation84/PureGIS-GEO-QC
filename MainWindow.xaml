@@ -489,25 +489,31 @@
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
+
                                                 <Button Grid.Column="0" Content="1. SHP/DBF 파일 열기" Name="OpenFileButton" Click="OpenFileButton_Click" 
-                    Style="{StaticResource ModernButtonStyle}" Height="40" Margin="-1,0,0,0"/>
-                                                <TextBlock Grid.Column="1" Text="검사할 파일 목록" Foreground="Gray" 
-                       VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="14" FontStyle="Italic"/>
-                                                <Button Grid.Column="2" Content="2. 전체 검사 실행" Name="ValidateButton" Click="ValidateButton_Click" FontSize="14" 
-                    Style="{StaticResource ModernButtonStyle}" Background="#FF3498DB" Foreground="White"/>
+                                                        Style="{StaticResource ModernButtonStyle}" Height="40" Margin="-1,0,5,0"/>
+
+                                                <Button Grid.Column="1" Content="❌ 선택 파일 제거" Name="RemoveFileButton" Click="RemoveFileButton_Click" 
+                                                        Style="{StaticResource ModernButtonStyle}" Background="#b03a2e" Foreground="White" Height="40" Margin="5,0,0,0"/>
+
+                                                <TextBlock Grid.Column="2" Text="검사할 파일 목록" Foreground="Gray" 
+                                                           VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="14" FontStyle="Italic"/>
+                                                <Button Grid.Column="3" Content="2. 전체 검사 실행" Name="ValidateButton" Click="ValidateButton_Click" FontSize="14" 
+                                                        Style="{StaticResource ModernButtonStyle}" Background="#FF3498DB" Foreground="White"/>
                                             </Grid>
                                         </Border>
 
                                         <ListBox Grid.Row="1" Name="FileListBox" Margin="10,0,10,10" Background="#FF2D2D30" 
-             Foreground="White" BorderBrush="#FF555555" SelectionChanged="FileListBox_SelectionChanged"/>
+                                                 Foreground="White" BorderBrush="#FF555555" SelectionChanged="FileListBox_SelectionChanged"/>
                                     </Grid>
                                 </Border>
 
                                 <DataGrid Name="LoadedFileGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" 
-                          Background="#FF2D2D30" Foreground="White" BorderBrush="Gray" Margin="10,0,10,10">
+                                          Background="#FF2D2D30" Foreground="White" BorderBrush="Gray" Margin="10,0,10,10">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="컬럼명" Binding="{Binding ColumnName}" Width="2*"/>
                                         <DataGridTextColumn Header="타입" Binding="{Binding DataType.Name}" Width="*"/>

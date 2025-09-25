@@ -37,15 +37,18 @@ namespace PureGIS_Geo_QC_Standalone
     {
         // ✨ 1. 체험판 모드인지 저장할 변수 추가
         private bool IsTrialMode = false;
-        private List<TableDefinition> standardTables = new List<TableDefinition>();
+        
         // 다중 파일 관리를 위한 변수들
-        private List<Shapefile> loadedShapefiles = new List<Shapefile>();
-        private Shapefile currentSelectedFile = null;
+        private List<Shapefile> loadedShapefiles = new List<Shapefile>();        
         private MultiFileReport multiFileReport = new MultiFileReport();
         private ProjectDefinition currentProject = null;
         private TableDefinition currentSelectedTable = null;
-        public List<string> ColumnTypes { get; } = new List<string> { "VARCHAR2", "NUMBER", "DATE" };
-        public MainWindow()
+        // 1. 매개변수가 없는 기본 생성자는 이 생성자를 호출하도록 수정합니다.
+        public MainWindow() : this(false) // 기본적으로는 체험판이 아닌 상태로 시작
+        {
+        }
+
+        public MainWindow(bool isTrial)
         {
             // =======================================================
             // ✨ PdfSharpCore 폰트 리졸버를 전역으로 설정
@@ -55,7 +58,7 @@ namespace PureGIS_Geo_QC_Standalone
             this.DataContext = this;
 
             // 전달받은 값으로 체험판 모드 설정
-        //    this.IsTrialMode = isTrial;
+            this.IsTrialMode = isTrial;
 
             // 창 제목에 체험판 표시
             if (this.IsTrialMode)
@@ -210,172 +213,7 @@ namespace PureGIS_Geo_QC_Standalone
             {
                 System.Diagnostics.Debug.WriteLine($"UpdateTableList 오류: {ex.Message}");
             }
-        }
-        // =================== 탭 3 로직 (검사 실행) ===================        
-        #region Validation Methods
-        private void ValidateFile(Shapefile shapefile, TableDefinition standardTable)
-        {
-            var results = new List<ColumnValidationResult>();
-            try
-            {
-                foreach (var stdCol in standardTable.Columns)
-                {
-                    var resultRow = new ColumnValidationResult
-                    {
-                        // ✅ 추가: 컬럼ID 저장
-                        Std_ColumnId = stdCol.ColumnId,
-
-                        Std_ColumnName = stdCol.ColumnName,
-                        Std_Type = stdCol.Type,
-                        Std_Length = stdCol.Length,
-                    };
-
-                    // ❌ 기존: stdCol.ColumnName으로 찾았음
-                    // ✅ 수정: stdCol.ColumnId로 변경
-                    if (!shapefile.DataTable.Columns.Contains(stdCol.ColumnId))
-                    {
-                        resultRow.Status = "오류";
-                        // ✅ 추가: 찾은 필드명과 존재 여부 설정
-                        resultRow.Found_FieldName = "없음";
-                        resultRow.IsFieldFound = false;
-
-                        resultRow.Cur_Type = "없음";
-                        resultRow.Cur_Length = "없음";
-                        resultRow.IsTypeCorrect = false;
-                        resultRow.IsLengthCorrect = false;
-                        results.Add(resultRow);
-                        continue;
-                    }
-                    // ❌ 기존: stdCol.ColumnName으로 필드 정보 가져왔음
-                    // ✅ 수정: stdCol.ColumnId로 변경
-                    var (curTypeName, curPrecision, curScale) = GetDbfFieldInfo(shapefile, stdCol.ColumnId);
-
-                    // ✅ 추가: 찾은 필드명과 존재 여부 설정
-                    resultRow.Found_FieldName = stdCol.ColumnId;
-                    resultRow.IsFieldFound = true;
-
-                    resultRow.Cur_Type = curTypeName;
-                    resultRow.Cur_Length = curScale > 0 ? $"{curPrecision},{curScale}" : curPrecision.ToString();
-
-                    if (stdCol.Type.Equals("VARCHAR2", StringComparison.OrdinalIgnoreCase))
-                    {
-                        resultRow.IsTypeCorrect = curTypeName.Equals("Character", StringComparison.OrdinalIgnoreCase);
-                    }
-                    else if (stdCol.Type.Equals("NUMBER", StringComparison.OrdinalIgnoreCase))
-                    {
-                        resultRow.IsTypeCorrect = curTypeName.Equals("Numeric", StringComparison.OrdinalIgnoreCase);
-                    }
-                    else
-                    {
-                        resultRow.IsTypeCorrect = stdCol.Type.Equals(curTypeName, StringComparison.OrdinalIgnoreCase);
-                    }
-
-                    if (resultRow.IsTypeCorrect)
-                    {
-                        var (stdPrecision, stdScale) = ParseStandardLength(stdCol.Length);
-                        if (stdCol.Type.Equals("VARCHAR2", StringComparison.OrdinalIgnoreCase))
-                        {
-                            resultRow.IsLengthCorrect = (stdPrecision == curPrecision);
-                        }
-                        else if (stdCol.Type.Equals("NUMBER", StringComparison.OrdinalIgnoreCase))
-                        {
-                            resultRow.IsLengthCorrect = (stdPrecision == curPrecision && stdScale == curScale);
-                        }
-                        else
-                        {
-                            resultRow.IsLengthCorrect = true;
-                        }
-                    }
-                    else
-                    {
-                        resultRow.IsLengthCorrect = false;
-                    }
-
-                    resultRow.Status = (resultRow.IsTypeCorrect && resultRow.IsLengthCorrect) ? "정상" : "오류";
-                    results.Add(resultRow);
-
-                }
-
-
-            }
-            catch (Exception ex)
-            {
-                CustomMessageBox.Show(this, "검사 오류", $"파일 검사 중 오류가 발생했습니다: {ex.Message}");
-            }
-
-        }             
-        #endregion
-
-        /// <summary>
-        /// DBF 파일에서 필드의 타입을 추출
-        /// </summary>
-        private string GetDbfFieldType(Shapefile shapefile, string fieldName)
-        {
-            try
-            {
-                // DotSpatial에서 DBF 파일의 필드 정보에 접근하는 방법
-                // DataTable의 컬럼 타입을 확인
-                var column = shapefile.DataTable.Columns[fieldName];
-                if (column != null)
-                {
-                    Type colType = column.DataType;
-                    if (colType == typeof(double) || colType == typeof(float) || colType == typeof(decimal))
-                    {
-                        return "NUMBER";
-                    }
-                    else if (colType == typeof(int) || colType == typeof(long))
-                    {
-                        return "NUMBER";
-                    }
-                    else if (colType == typeof(string))
-                    {
-                        return "VARCHAR2";
-                    }
-                    else if (colType == typeof(DateTime))
-                    {
-                        return "DATE";
-                    }
-                }
-                return "VARCHAR2"; // 기본값
-            }
-            catch
-            {
-                return "UNKNOWN";
-            }
-        }
-
-        /// <summary>
-        /// DBF 파일에서 필드의 길이 정보를 추출
-        /// </summary>
-        private string GetDbfFieldLength(Shapefile shapefile, string fieldName)
-        {
-            try
-            {
-                // DataTable의 컬럼을 DotSpatial.Data.Field로 캐스팅
-                var field = shapefile.DataTable.Columns[fieldName] as DotSpatial.Data.Field;
-                if (field != null)
-                {
-                    if (field.DecimalCount > 0)
-                        return $"{field.Length},{field.DecimalCount}"; // 예: "10,2"
-                    else
-                        return field.Length.ToString(); // 예: "50"
-                }
-
-                // Fallback: 일반 DataColumn 처리
-                var column = shapefile.DataTable.Columns[fieldName];
-                if (column != null && column.DataType == typeof(string))
-                {
-                    return column.MaxLength > 0 ? column.MaxLength.ToString() : "255";
-                }
-
-                return "UNKNOWN";
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"GetDbfFieldLength 오류: {ex.Message}");
-                return "ERROR";
-            }
-        }         
+        }        
         private async void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             // LicenseManager 인스턴스를 통해 비동기적으로 로그아웃을 호출합니다.

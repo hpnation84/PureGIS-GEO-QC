@@ -60,6 +60,34 @@ namespace PureGIS_Geo_QC_Standalone
             FileListBox.ItemsSource = loadedShapefiles.Select(f => System.IO.Path.GetFileName(f.Filename)).ToList();
         }
         /// <summary>
+        /// 파일 목록에서 선택한 파일을 제거합니다.
+        /// </summary>
+        private void RemoveFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            // 1. 목록에서 선택된 항목을 가져옵니다.
+            var selectedItem = FileListBox.SelectedItem as string;
+
+            if (selectedItem == null)
+            {
+                CustomMessageBox.Show(this, "알림", "제거할 파일을 목록에서 먼저 선택하세요.");
+                return;
+            }
+
+            // 2. loadedShapefiles 리스트에서 해당 파일을 찾아 제거합니다.
+            var fileToRemove = loadedShapefiles.FirstOrDefault(f => System.IO.Path.GetFileName(f.Filename) == selectedItem);
+
+            if (fileToRemove != null)
+            {
+                loadedShapefiles.Remove(fileToRemove);
+
+                // 3. 파일 목록 UI를 새로고침합니다.
+                UpdateFileListBox();
+
+                // 4. 상세 정보 그리드를 초기화합니다.
+                LoadedFileGrid.ItemsSource = null;
+            }
+        }
+        /// <summary>
         /// ListBox에서 파일을 선택하면 해당 파일의 컬럼 정보를 DataGrid에 표시합니다.
         /// </summary>
         private void FileListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
