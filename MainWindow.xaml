@@ -518,8 +518,8 @@
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <CheckBox IsChecked="{Binding IsNotNull, UpdateSourceTrigger=PropertyChanged}" 
-                                                              HorizontalAlignment="Center" 
-                                                              VerticalAlignment="Center"/>
+                                                               HorizontalAlignment="Center" 
+                                                               VerticalAlignment="Center"/>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
@@ -578,8 +578,10 @@
                                     <Button Name="DeleteCodeButton" Content="삭제" Width="80" Click="DeleteCodeButton_Click" Style="{StaticResource ModernButtonStyle}" Background="#b03a2e" Foreground="White"/>
                                 </StackPanel>
 
-                                <DataGrid Name="CodeDataGrid" Margin="5,0,5,0" AutoGenerateColumns="False" 
-                                          CanUserAddRows="False" Background="#FF2D2D30" IsReadOnly="False">
+                                <DataGrid Name="CodeDataGrid" Margin="10,0,10,10" AutoGenerateColumns="False" 
+                                          CanUserAddRows="False" Background="#FF2D2D30" IsReadOnly="False"
+                                          SelectionUnit="Cell"
+                                          SelectionMode="Extended">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="코드" Binding="{Binding Code}" Width="*">
                                             <DataGridTextColumn.ElementStyle>
