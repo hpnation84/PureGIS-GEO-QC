@@ -91,12 +91,20 @@
             </Setter>
         </Style>
         <Style TargetType="{x:Type DataGridCell}">
-            <Setter Property="Background" Value="#FF2D2D30"/>
+            <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="Padding" Value="8,0,5,0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#FF3478D7"/>
+                    <Setter Property="BorderBrush" Value="#FF99C3E6"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
         <Style TargetType="{x:Type DataGridRow}">
             <Setter Property="Background" Value="Transparent"/>
@@ -461,11 +469,18 @@
                                                Foreground="LightBlue" FontSize="12" TextWrapping="Wrap"/>
                                 </Border>
 
+                                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,10,10,10">
+                                    <Button Content="추가" Width="60" Margin="5,0" Style="{StaticResource ModernButtonStyle}" Click="AddColumnButton_Click"/>
+                                    <Button Content="삭제" Width="60" Margin="5,0" Style="{StaticResource ModernButtonStyle}" Background="#b03a2e" Foreground="White" Click="DeleteColumnButton_Click"/>
+                                    <Button Content=" ▲ " Width="40" Margin="15,0,5,0" Style="{StaticResource ModernButtonStyle}" Click="MoveColumnUp_Click"/>
+                                    <Button Content=" ▼ " Width="40" Margin="5,0" Style="{StaticResource ModernButtonStyle}" Click="MoveColumnDown_Click"/>
+                                </StackPanel>
+
                                 <DataGrid Name="StandardGrid" AutoGenerateColumns="False" 
                                           CanUserAddRows="False" Background="#FF2D2D30" Foreground="White" BorderBrush="Gray" RowHeight="28"                                          
                                           IsReadOnly="False"
                                           SelectionUnit="Cell"
-                                          SelectionMode="Extended">
+                                          SelectionMode="Extended" Margin="5,0,5,0">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="컬럼 ID" Binding="{Binding ColumnId}" Width="*">
                                             <DataGridTextColumn.ElementStyle>
@@ -499,10 +514,26 @@
                                                 </Style>
                                             </DataGridTextColumn.ElementStyle>
                                         </DataGridTextColumn>
-                                        <DataGridCheckBoxColumn Header="NOT NULL" Binding="{Binding IsNotNull}" Width="80"/>
-                                        <DataGridTextColumn Header="코드명" Binding="{Binding CodeName}" Width="*"/>
+                                        <DataGridTemplateColumn Header="NOT NULL" Width="80">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox IsChecked="{Binding IsNotNull, UpdateSourceTrigger=PropertyChanged}" 
+                                                              HorizontalAlignment="Center" 
+                                                              VerticalAlignment="Center"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTextColumn Header="코드명" Binding="{Binding CodeName}" Width="*">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="VerticalAlignment" Value="Center"/>                                                    
+                                                    <Setter Property="Padding" Value="8,0,0,0"/>
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
                                     </DataGrid.Columns>
-                                </DataGrid>
+                                </DataGrid>                                
+                                
                             </DockPanel>
                         </Border>
                     </Grid>
@@ -531,7 +562,7 @@
                                     <Button Name="EditCodeSetButton" Content="수정" Width="80" Margin="10,0" Click="EditCodeSetButton_Click" Style="{StaticResource ModernButtonStyle}"/>
                                     <Button Name="DeleteCodeSetButton" Content="삭제" Width="80" Click="DeleteCodeSetButton_Click" Style="{StaticResource ModernButtonStyle}" Background="#b03a2e" Foreground="White"/>
                                 </StackPanel>
-                                <ListView Name="CodeSetListView" Margin="10,0,10,10" SelectionChanged="CodeSetListView_SelectionChanged" DisplayMemberPath="CodeName"/>
+                                <ListView Name="CodeSetListView" Margin="5,0,5,0" SelectionChanged="CodeSetListView_SelectionChanged" DisplayMemberPath="CodeName"/>
                             </DockPanel>
                         </Border>
 
@@ -540,17 +571,32 @@
                         <Border Grid.Column="2" Background="#FF3E3E42" CornerRadius="5" Margin="10">
                             <DockPanel>
                                 <TextBlock Name="SelectedCodeSetHeader" DockPanel.Dock="Top" Text="코드 그룹을 선택하세요" Foreground="White" FontSize="16" Margin="10" FontWeight="Bold"/>
-                                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                                
+                                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
                                     <Button Name="AddCodeButton" Content="추가" Width="80" Click="AddCodeButton_Click" Style="{StaticResource ModernButtonStyle}"/>
-                                    <Button Name="EditCodeButton" Content="수정" Width="80" Margin="10,0" Click="EditCodeButton_Click" Style="{StaticResource ModernButtonStyle}"/>
+                                    <Button Name="EditCodeButton" Content="수정" Width="80" Margin="10,0" Click="EditCodeButton_Click" Style="{StaticResource ModernButtonStyle}" Padding="10,8,10,6"/>
                                     <Button Name="DeleteCodeButton" Content="삭제" Width="80" Click="DeleteCodeButton_Click" Style="{StaticResource ModernButtonStyle}" Background="#b03a2e" Foreground="White"/>
                                 </StackPanel>
 
-                                <DataGrid Name="CodeDataGrid" Margin="10,0,10,10" AutoGenerateColumns="False" 
+                                <DataGrid Name="CodeDataGrid" Margin="5,0,5,0" AutoGenerateColumns="False" 
                                           CanUserAddRows="False" Background="#FF2D2D30" IsReadOnly="False">
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="코드" Binding="{Binding Code}" Width="*"/>
-                                        <DataGridTextColumn Header="코드명(한글)" Binding="{Binding Description}" Width="2*"/>
+                                        <DataGridTextColumn Header="코드" Binding="{Binding Code}" Width="*">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                                    <Setter Property="Padding" Value="8,0,0,0"/>
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Header="코드명(한글)" Binding="{Binding Description}" Width="2*">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                                    <Setter Property="Padding" Value="8,0,0,0"/>
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </DockPanel>

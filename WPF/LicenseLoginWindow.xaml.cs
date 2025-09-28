@@ -3,6 +3,8 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using PureGIS_Geo_QC.Licensing;
+using System.Diagnostics; // Process.Start를 위해 필요
+using System.Windows.Navigation; // RequestNavigateEventArgs를 위해 필요
 using LicenseManager = PureGIS_Geo_QC.Licensing.LicenseManager;
 
 namespace PureGIS_Geo_QC.WPF
@@ -129,5 +131,28 @@ namespace PureGIS_Geo_QC.WPF
 
             base.OnClosing(e);
         }
+        // 창 드래그 이동을 위한 이벤트 핸들러
+        private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                this.DragMove();
+            }
+        }
+
+        // 커스텀 닫기 버튼
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            // 기본 브라우저를 통해 링크를 엽니다.
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+
+            // 이벤트가 처리되었음을 알립니다.
+            e.Handled = true;
+        }
+
     }
 }

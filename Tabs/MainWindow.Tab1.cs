@@ -198,17 +198,17 @@ namespace PureGIS_Geo_QC_Standalone
                 }
             }
 
-            // InputDialog를 사용하여 사용자에게 테이블 이름을 입력받습니다.
-            var dialog = new InputDialog("새 테이블 이름을 입력하세요.", "새 테이블");
+            // InputDialog 대신 새로 만든 NewTableDialog를 사용합니다.
+            var dialog = new NewTableDialog();
             dialog.Owner = this;
 
             if (dialog.ShowDialog() == true)
             {
                 var newTable = new TableDefinition
                 {
-                    // 고유 ID는 자동으로 생성하고, TableName은 입력받은 값으로 설정합니다.
-                    TableId = "TBL_" + DateTime.Now.ToString("HHmmss"),
-                    TableName = dialog.InputText
+                    // 대화 상자에서 입력받은 값을 각각 할당합니다.
+                    TableId = dialog.TableId,
+                    TableName = dialog.TableName
                 };
 
                 targetCategory.Tables.Add(newTable);

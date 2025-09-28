@@ -158,17 +158,17 @@ namespace PureGIS_Geo_QC_Standalone
         {
             if (e.Key == Key.V && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
-                // ===== 👇 [수정] 탭 인덱스에 따라 다른 메서드를 호출하도록 변경 =====
+                // 현재 활성화된 탭에 따라 대상 그리드를 선택하고 새 붙여넣기 함수 호출
                 switch (MainTabControl.SelectedIndex)
                 {
                     case 0: // 기준 정의 탭
-                        PasteColumnsToCurrentTable();
+                        HandleExcelPaste(StandardGrid);
                         break;
                     case 1: // 코드 관리 탭
-                        PasteCodesToCurrentCodeSet();
+                        HandleExcelPaste(CodeDataGrid);
                         break;
                 }
-                e.Handled = true;
+                e.Handled = true; // 이벤트 처리 완료
             }
         }
         #endregion

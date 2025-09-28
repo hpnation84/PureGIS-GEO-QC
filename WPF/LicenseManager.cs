@@ -21,7 +21,15 @@ namespace PureGIS_Geo_QC.Licensing
         private string _sessionToken;
         private string _licenseKey;
         private string _machineId;
-        private bool _isLicenseValid = false;
+        private bool _isLicenseValid = false;        
+        private string _companyName = ""; // 회사 이름 저장을 위한 필드
+        private string _expiryDate = "";  // 만료일 저장을 위한 필드
+                                          // 외부에서 접근할 수 있도록 공개 속성 추가
+        public bool IsLicenseValid => _isLicenseValid;
+        public string SessionToken => _sessionToken;
+        public string LicenseKey => _licenseKey;
+        public string CompanyName => _companyName;
+        public string ExpiryDate => _expiryDate;
 
         public static LicenseManager Instance
         {
@@ -43,11 +51,7 @@ namespace PureGIS_Geo_QC.Licensing
         {
             _machineId = GetMachineId();
             InitializeHeartbeatTimer();
-        }
-
-        public bool IsLicenseValid => _isLicenseValid;
-        public string SessionToken => _sessionToken;
-        public string LicenseKey => _licenseKey;
+        }             
 
         /// <summary>
         /// 라이선스 로그인
@@ -78,6 +82,8 @@ namespace PureGIS_Geo_QC.Licensing
                             _licenseKey = licenseKey;
                             _sessionToken = result.SessionToken;
                             _isLicenseValid = true;
+                            _companyName = result.CompanyName; // 로그인 성공 시 정보 저장
+                            _expiryDate = result.ExpiryDate;   // 로그인 성공 시 정보 저장
 
                             StartHeartbeat();
 

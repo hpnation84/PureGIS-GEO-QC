@@ -110,6 +110,30 @@ namespace PureGIS_Geo_QC.Helpers
         }
 
         /// <summary>
+        /// 클립보드 텍스트를 행과 열로 구성된 리스트로 파싱합니다. (엑셀과 유사한 동작)
+        /// </summary>
+        public static List<string[]> ParseClipboardGridData(string clipboardText)
+        {
+            var gridData = new List<string[]>();
+            if (string.IsNullOrWhiteSpace(clipboardText))
+            {
+                return gridData;
+            }
+
+            // 줄바꿈으로 각 행을 분리합니다.
+            var lines = clipboardText.TrimEnd('\r', '\n').Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+
+            foreach (var line in lines)
+            {
+                // 탭으로 각 열(셀)을 분리합니다.
+                var cells = line.Split('\t');
+                gridData.Add(cells);
+            }
+
+            return gridData;
+        }
+
+        /// <summary>
         /// 단순한 엑셀 데이터 (헤더 + 데이터 행들) 파싱
         /// </summary>
         /// <param name="clipboardText">클립보드 텍스트</param>
@@ -158,10 +182,6 @@ namespace PureGIS_Geo_QC.Helpers
         /// <summary>
         /// 배열에서 안전하게 값을 가져오는 헬퍼 함수
         /// </summary>
-        /// <param name="array">대상 배열</param>
-        /// <param name="index">인덱스</param>
-        /// <param name="defaultValue">기본값</param>
-        /// <returns>안전하게 추출된 값</returns>
         public static string GetSafeArrayValue(string[] array, int index, string defaultValue)
         {
             if (array != null && index >= 0 && index < array.Length)
@@ -169,6 +189,36 @@ namespace PureGIS_Geo_QC.Helpers
                 return string.IsNullOrWhiteSpace(array[index]) ? defaultValue : array[index].Trim();
             }
             return defaultValue;
+        }
+
+        /// <summary>
+        /// 클립보드에서 컬럼 데이터만 파싱
+        /// </summary>
+        public static List<ColumnDefinition> ParseColumnsFromClipboard(string clipboardText)
+        {
+            var columns = new List<ColumnDefinition>();
+
+            if (string.IsNullOrWhiteSpace(clipboardText)) return columns;
+
+            var lines = clipboardText.Trim().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrWhiteSpace(line)) continue;
+                var cols = line.Split('\t');
+                if (cols.Length < 2) continue;
+
+                columns.Add(new ColumnDefinition
+                {
+                    ColumnId = GetSafeArrayValue(cols, 0, "COL_" + DateTime.Now.Ticks.ToString().Substring(10)),
+                    ColumnName = GetSafeArrayValue(cols, 1, "컬럼_" + columns.Count),
+                    Type = GetSafeArrayValue(cols, 2, "VARCHAR2"),
+                    Length = GetSafeArrayValue(cols, 3, "50"),
+                    IsNotNull = GetSafeArrayValue(cols, 4, "N").ToUpper() == "Y", // NOT NULL 파싱 추가
+                    CodeName = GetSafeArrayValue(cols, 5, "") // CodeName 파싱 추가
+                });
+            }
+            return columns;
         }
     }
 }
